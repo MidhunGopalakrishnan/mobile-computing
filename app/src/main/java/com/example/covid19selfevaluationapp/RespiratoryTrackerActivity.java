@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.covid19selfevaluationapp.service.AccelerometerService;
@@ -32,6 +33,7 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
     private ArrayList<Float> deltaValuesList = new ArrayList<Float>();
     private static final int samplingLimit = 450;
     private HashMap<String,Float> symptomsMap = new HashMap<String,Float>();
+    Button startCapture;
 
     private LineChart lineChart;
     @Override
@@ -45,6 +47,10 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
 
     @Override
     public void onBackPressed() {
+        //stop accelerometer service if not stopped yet
+        Intent serviceIntent = new Intent(RespiratoryTrackerActivity.this, AccelerometerService.class);
+        stopService(serviceIntent);
+
         Intent intent = new Intent();
         intent.putExtra("SymptomsMap",symptomsMap);
         setResult(RESULT_OK, intent);
@@ -59,7 +65,17 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
         Intent serviceIntent = new Intent(RespiratoryTrackerActivity.this, AccelerometerService.class);
         results = new AccelerometerResultReceiver(new Handler());
         serviceIntent.putExtra(Intent.EXTRA_RESULT_RECEIVER,results);
+        startCapture = findViewById(R.id.button5);
+        startCapture.setEnabled(false);
+        //clear graph and start
+        lineChart = (LineChart) findViewById(R.id.linechart);
+        lineChart.clear();
         startService(serviceIntent);
+    }
+
+    public void stopCaptureFromSensor() {
+        onStopCapture(findViewById(R.id.button5).getRootView());
+        startCapture.setEnabled(true);
     }
 
     public void onStopCapture(View view) {
@@ -73,6 +89,7 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
     public class AccelerometerResultReceiver extends ResultReceiver {
 
         private int i =0;
+        private int respiratoryRate =0;
 
     /**
      * Create a new ResultReceive to receive results.  Your
@@ -93,11 +110,24 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
 
         //check status and fetch results here
         if(resultCode == RESULT_OK && resultData!=null){
+
+            lineChart = (LineChart) findViewById(R.id.linechart);
+
            // Log.d(TAG, "onReceiveResult: " + resultData.getString("zValue"));
-            rateValue.setText(resultData.getString("zValue"));
+            //if you restart capture reset i to 0
+            if(i>449) {
+                i=0;
+                lineChart.clear();
+                respiratoryRate=0;
+                deltaValuesList.clear();
+                zValues.clear();
+            }
+            if(i%10 ==0) {
+                rateValue.setText(" " + i + "/450");
+            }
 
             //test chart
-            lineChart = (LineChart) findViewById(R.id.linechart);
+
 
             lineChart.setDragEnabled(false);
             lineChart.setScaleEnabled(false);
@@ -109,29 +139,34 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
                 oldValue = (Float) (zValues.get(zValues.size() - 1).getY());
             }
             Float deltaChangeValue = newValue - oldValue;
+            if(deltaChangeValue>= 0.35) {
+                respiratoryRate++;
+            }
             if(i!=0) {
                 deltaValuesList.add(deltaChangeValue);
             }
             else {
                 deltaValuesList.add(0f);
             }
-            if(deltaValuesList.size()== 450) {
-                i=0;
-                Log.d(TAG, "Delta Values : "+ deltaValuesList.toString());
+            if(deltaValuesList.size()== 449) {
+                rateValue.setText(String.valueOf(Math.floor((respiratoryRate*60)/45))+ " BPM");
+                symptomsMap.put("Respiratory Rate", (float) Math.floor((respiratoryRate*60)/45));
+                stopCaptureFromSensor();
             }
-            zValues.add(new Entry(i,newValue));
+            else {
+                zValues.add(new Entry(i, newValue));
 
-            ArrayList<ILineDataSet> dataSets = new ArrayList<>();
+                ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 
-            LineDataSet lineDataSet1 = new LineDataSet(zValues, " Data from Sensor ");
-            lineDataSet1.setDrawCircles(false);
-            lineDataSet1.setColor(Color.BLUE);
+                LineDataSet lineDataSet1 = new LineDataSet(zValues, " Data from Sensor ");
+                lineDataSet1.setDrawCircles(false);
+                lineDataSet1.setColor(Color.BLUE);
 
-            dataSets.add(lineDataSet1);
+                dataSets.add(lineDataSet1);
 
-            lineChart.setData(new LineData(dataSets));
+                lineChart.setData(new LineData(dataSets));
 
-            // if i reaches 450, reset i to 0
+                // if i reaches 450, reset i to 0
 //            if(i == 449) {
 //                i=0;
 //                for (int j=0;j < 449;j++){
@@ -146,21 +181,21 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
 //            }else {
 //                i = i+1;
 //            }
-            if (lineDataSet1.getEntryCount() >= samplingLimit-1) {
-                lineDataSet1.removeFirst();
-                for (int j=0; j<lineDataSet1.getEntryCount(); j++) {
-                    Entry entryToChange = lineDataSet1.getEntryForIndex(j);
-                    entryToChange.setX(entryToChange.getX() +1);
+                if (lineDataSet1.getEntryCount() >= samplingLimit - 1) {
+                    lineDataSet1.removeFirst();
+                    for (int j = 0; j < lineDataSet1.getEntryCount(); j++) {
+                        Entry entryToChange = lineDataSet1.getEntryForIndex(j);
+                        entryToChange.setX(entryToChange.getX() + 1);
+                    }
                 }
+
+                //refresh graph
+                // lineChart.moveViewToX(lineDataSet1.getEntryCount());
+                lineChart.notifyDataSetChanged();
+                lineChart.invalidate();
+
+                i++;
             }
-
-            //refresh graph
-           // lineChart.moveViewToX(lineDataSet1.getEntryCount());
-            lineChart.notifyDataSetChanged();
-            lineChart.invalidate();
-
-            i++;
-
         }
         else {
             // no data from sensor. Set the result as no data from Sensor
