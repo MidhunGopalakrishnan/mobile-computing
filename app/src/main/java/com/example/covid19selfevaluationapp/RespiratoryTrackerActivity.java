@@ -20,6 +20,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -28,7 +29,7 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
     private AccelerometerResultReceiver results;
     private TextView rateValue;
     private ArrayList<Entry> zValues = new ArrayList<Entry>();
-    private int i =0;
+    private ArrayList<Float> deltaValuesList = new ArrayList<Float>();
     private static final int samplingLimit = 450;
     private HashMap<String,Float> symptomsMap = new HashMap<String,Float>();
 
@@ -71,6 +72,8 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
 // extend Result Receiver and fetch results
     public class AccelerometerResultReceiver extends ResultReceiver {
 
+        private int i =0;
+
     /**
      * Create a new ResultReceive to receive results.  Your
      * {@link #onReceiveResult} method will be called from the thread running
@@ -84,13 +87,13 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
 
     @Override
     protected void onReceiveResult(int resultCode, Bundle resultData) {
-        symptomsMap.put("Respiratory Rate",18f) ; //TODO
+        //symptomsMap.put("Respiratory Rate",18f) ; //TODO
         super.onReceiveResult(resultCode, resultData);
         rateValue = (TextView) findViewById(R.id.textView5);
 
         //check status and fetch results here
         if(resultCode == RESULT_OK && resultData!=null){
-            Log.d(TAG, "onReceiveResult: " + resultData.getString("zValue"));
+           // Log.d(TAG, "onReceiveResult: " + resultData.getString("zValue"));
             rateValue.setText(resultData.getString("zValue"));
 
             //test chart
@@ -101,8 +104,20 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
             lineChart.getDescription().setEnabled(false);
 
             Float newValue = Float.valueOf(resultData.getString("zValue"));
+            Float oldValue =0f;
             if(zValues.size()!=0) {
-                Float oldValue = (Float) zValues.get(zValues.size() - 1).getData();
+                oldValue = (Float) (zValues.get(zValues.size() - 1).getY());
+            }
+            Float deltaChangeValue = newValue - oldValue;
+            if(i!=0) {
+                deltaValuesList.add(deltaChangeValue);
+            }
+            else {
+                deltaValuesList.add(0f);
+            }
+            if(deltaValuesList.size()== 450) {
+                i=0;
+                Log.d(TAG, "Delta Values : "+ deltaValuesList.toString());
             }
             zValues.add(new Entry(i,newValue));
 
@@ -137,18 +152,14 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
                     Entry entryToChange = lineDataSet1.getEntryForIndex(j);
                     entryToChange.setX(entryToChange.getX() +1);
                 }
-                i=0;
-
-            } else {
-                i = i+1;
             }
-
 
             //refresh graph
            // lineChart.moveViewToX(lineDataSet1.getEntryCount());
             lineChart.notifyDataSetChanged();
             lineChart.invalidate();
 
+            i++;
 
         }
         else {

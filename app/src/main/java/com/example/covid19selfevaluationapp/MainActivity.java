@@ -45,8 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 2000;
     private HashMap<String,Float> symptomsMap = new HashMap<String,Float>();
     public static final int VIDEO_REQUEST_CODE = 99;
-    public static final int ACCELEROMETER_REQUEST_CODE = 1;
-    public static final int SYMPTOM_REQUEST_CODE = 1;
+    public static final int ACCELEROMETER_REQUEST_CODE = 88;
+    public static final int SYMPTOM_REQUEST_CODE = 77;
     Uri videoUri;
     String filePath;
     VideoView videoView;
