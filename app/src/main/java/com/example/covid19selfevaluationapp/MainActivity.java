@@ -54,7 +54,26 @@ public class MainActivity extends AppCompatActivity {
     HeartRateMeasure measureHeartRate;
     private ArrayList<Float> redValuesList = new ArrayList<Float>();
     TextView heartRate ;
+
+    public int getTotalFrames() {
+        return totalFrames;
+    }
+
+    public void setTotalFrames(int totalFrames) {
+        this.totalFrames = totalFrames;
+    }
+
+    public int getCurrentFrame() {
+        return currentFrame;
+    }
+
+    public void setCurrentFrame(int currentFrame) {
+        this.currentFrame = currentFrame;
+    }
+
     int heartRateFinal = 0;
+    int currentFrame =0;
+    int totalFrames =0;
 
     public int getHeartRateFinal() {
         return heartRateFinal;
@@ -244,7 +263,8 @@ public class MainActivity extends AppCompatActivity {
                 int numberOfFrames = (int)Math.floor((totalVideoTime/1000)*samplingRate);
                 int sampleFrameTime = 100000;
                 int heartRateInner =1;
-
+                heartRate = (TextView) findViewById(R.id.textView6);
+                setTotalFrames(numberOfFrames);
                 // get frame at this time
                 for(int i = 1 ; i<numberOfFrames;i++) {
                     float redIntensity =0f;
@@ -254,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
 
                     //get center frame like 40x40 pixels and compute red
                     for(int x = 500; x<=600; x++){
-                        for(int y = 1000; y<=1100;y++){
+                        for(int y = 960; y<=1060;y++){
                             redIntensity+= Color.red(bitmapImage.getPixel(x,y)); //add to the frames red intensity
                         }
                     }
@@ -270,8 +290,14 @@ public class MainActivity extends AppCompatActivity {
                     redValuesList.add(redIntensity);
                     Log.d(TAG, "doInBackground: Red intensity values "+ redIntensity);
                     //Log.d(TAG, redValuesList.toString());
-                    onProgressUpdate((float) i, (float) numberOfFrames);
-
+                   // onProgressUpdate((float) i, (float) numberOfFrames);
+                    setCurrentFrame(i);
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            heartRate.setText("Processing "+getCurrentFrame()+"/"+getTotalFrames()+ " frames");
+                           // heartRate.setTextColor(Color.BLACK);
+                        }
+                    });
                 }
                 // check arrayList and do logic to compute heart rate and add to map
 
@@ -280,14 +306,14 @@ public class MainActivity extends AppCompatActivity {
                // Log.d(TAG, "doInBackground: Heart Rate is "+ value + " BPM");
 
 
-                heartRate = (TextView) findViewById(R.id.textView6);
+
                 setHeartRateFinal(value);
                 retriever.release();
 
                 runOnUiThread(new Runnable() {
                     public void run() {
                         heartRate.setText(getHeartRateFinal()+ " BPM");
-                        heartRate.setTextColor(Color.BLACK);
+                        //heartRate.setTextColor(Color.BLACK);
                     }
                 });
 
@@ -305,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateMainActivity(Float value1, Float value2) {
         heartRate = (TextView) findViewById(R.id.textView6);
-        heartRate.setText("Processing frame "+value1 +" out of "+ value2+ " frames");
+   //     heartRate.setText("Processing frame "+value1 +" out of "+ value2+ " frames");
     }
 
 

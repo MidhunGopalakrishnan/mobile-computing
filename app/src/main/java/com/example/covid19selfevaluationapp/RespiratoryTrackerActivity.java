@@ -100,8 +100,11 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
             lineChart.setScaleEnabled(false);
             lineChart.getDescription().setEnabled(false);
 
-
-            zValues.add(new Entry(i,Float.valueOf(resultData.getString("zValue"))));
+            Float newValue = Float.valueOf(resultData.getString("zValue"));
+            if(zValues.size()!=0) {
+                Float oldValue = (Float) zValues.get(zValues.size() - 1).getData();
+            }
+            zValues.add(new Entry(i,newValue));
 
             ArrayList<ILineDataSet> dataSets = new ArrayList<>();
 
@@ -135,6 +138,7 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
                     entryToChange.setX(entryToChange.getX() +1);
                 }
                 i=0;
+
             } else {
                 i = i+1;
             }
