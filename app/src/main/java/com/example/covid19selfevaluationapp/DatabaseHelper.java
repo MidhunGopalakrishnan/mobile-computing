@@ -59,8 +59,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COL2,(dataMap.get("Heart Rate")!=null)? dataMap.get("Heart Rate"): 0f);
-        contentValues.put(COL3,(dataMap.get("Respiratory Rate")!=null)? dataMap.get("Respiratory Rate"): 0f);
+        contentValues.put(COL2,(dataMap.get("Heart Rate")));
+        contentValues.put(COL3,(dataMap.get("Respiratory Rate")));
         contentValues.put(COL4,(dataMap.get("Nausea")!=null)? dataMap.get("Nausea"): 0f);
         contentValues.put(COL5,(dataMap.get("Headache")!=null)? dataMap.get("Headache"): 0f);
         contentValues.put(COL6,(dataMap.get("Diarrhea")!=null)? dataMap.get("Diarrhea"): 0f);
