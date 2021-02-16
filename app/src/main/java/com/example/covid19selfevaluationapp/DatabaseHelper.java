@@ -59,18 +59,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COL2,dataMap.get("Heart Rate"));
-        contentValues.put(COL3,dataMap.get("Respiratory Rate"));
-        contentValues.put(COL4,dataMap.get("Nausea"));
-        contentValues.put(COL5,dataMap.get("Headache"));
-        contentValues.put(COL6,dataMap.get("Diarrhea"));
-        contentValues.put(COL7,dataMap.get("Soar Throat"));
-        contentValues.put(COL8,dataMap.get("Fever"));
-        contentValues.put(COL9,dataMap.get("Muscle Ache"));
-        contentValues.put(COL10,dataMap.get("Loss of Smell or Taste"));
-        contentValues.put(COL11,dataMap.get("Cough"));
-        contentValues.put(COL12,dataMap.get("Shortness of Breath"));
-        contentValues.put(COL13,dataMap.get("Feeling Tired"));
+        contentValues.put(COL2,(dataMap.get("Heart Rate")!=null)? dataMap.get("Heart Rate"): 0f);
+        contentValues.put(COL3,(dataMap.get("Respiratory Rate")!=null)? dataMap.get("Respiratory Rate"): 0f);
+        contentValues.put(COL4,(dataMap.get("Nausea")!=null)? dataMap.get("Nausea"): 0f);
+        contentValues.put(COL5,(dataMap.get("Headache")!=null)? dataMap.get("Headache"): 0f);
+        contentValues.put(COL6,(dataMap.get("Diarrhea")!=null)? dataMap.get("Diarrhea"): 0f);
+        contentValues.put(COL7,(dataMap.get("Soar Throat")!=null)? dataMap.get("Soar Throat"): 0f);
+        contentValues.put(COL8,(dataMap.get("Fever")!=null)? dataMap.get("Fever"): 0f);
+        contentValues.put(COL9,(dataMap.get("Muscle Ache")!=null)? dataMap.get("Muscle Ache"): 0f);
+        contentValues.put(COL10,(dataMap.get("Loss of Smell or Taste")!=null)? dataMap.get("Loss of Smell or Taste"): 0f);
+        contentValues.put(COL11,(dataMap.get("Cough")!=null)? dataMap.get("Cough"): 0f);
+        contentValues.put(COL12,(dataMap.get("Shortness of Breath")!=null)? dataMap.get("Shortness of Breath"): 0f);
+        contentValues.put(COL13,(dataMap.get("Feeling Tired")!=null)? dataMap.get("Feeling Tired"): 0f);
 
 
         Log.d(TAG,"createRecord: Record created successfully in table "+TABLE_NAME);
