@@ -35,6 +35,16 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
     private HashMap<String,Float> symptomsMap = new HashMap<String,Float>();
     Button startCapture;
 
+    public int getRespTestValue() {
+        return respTestValue;
+    }
+
+    public void setRespTestValue(int respTestValue) {
+        this.respTestValue = respTestValue;
+    }
+
+    int respTestValue = 0;
+
     private LineChart lineChart;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +80,7 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
         //clear graph and start
         lineChart = (LineChart) findViewById(R.id.linechart);
         lineChart.clear();
+        setRespTestValue(0);
         startService(serviceIntent);
     }
 
@@ -118,7 +129,6 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
             if(i>449) {
                 i=0;
                 lineChart.clear();
-                respiratoryRate=0;
                 deltaValuesList.clear();
                 zValues.clear();
             }
@@ -139,8 +149,9 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
                 oldValue = (Float) (zValues.get(zValues.size() - 1).getY());
             }
             Float deltaChangeValue = newValue - oldValue;
-            if(deltaChangeValue>= 0.35) {
+            if(deltaChangeValue>= 0.3 || deltaChangeValue <= -0.3) {
                 respiratoryRate++;
+                setRespTestValue(getRespTestValue()+1);
             }
             if(i!=0) {
                 deltaValuesList.add(deltaChangeValue);
@@ -149,8 +160,10 @@ public class RespiratoryTrackerActivity extends AppCompatActivity  {
                 deltaValuesList.add(0f);
             }
             if(deltaValuesList.size()== 449) {
-                rateValue.setText(String.valueOf(Math.floor((respiratoryRate*60)/45))+ " BPM");
-                symptomsMap.put("Respiratory Rate", (float) Math.floor((respiratoryRate*60)/45));
+//                rateValue.setText(String.valueOf(Math.floor((respiratoryRate*60)/45))+ " BPM");
+//                symptomsMap.put("Respiratory Rate", (float) Math.floor((respiratoryRate*60)/45));
+                rateValue.setText(String.valueOf(Math.floor((getRespTestValue()*60)/45))+ " BPM");
+                symptomsMap.put("Respiratory Rate", (float) Math.floor((getRespTestValue()*60)/45));
                 stopCaptureFromSensor();
             }
             else {

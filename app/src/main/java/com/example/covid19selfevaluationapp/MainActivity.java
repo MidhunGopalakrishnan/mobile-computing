@@ -123,6 +123,8 @@ public class MainActivity extends AppCompatActivity {
         if(requestCode ==ACCELEROMETER_REQUEST_CODE){
             if(resultCode == RESULT_OK) {
                 symptomsMap = (HashMap)data.getSerializableExtra("SymptomsMap");
+                TextView t7 = findViewById(R.id.textView7);
+                t7.setText(symptomsMap.get("Respiratory Rate")+" BPM");
             }
         }
         else if(requestCode ==SYMPTOM_REQUEST_CODE){
